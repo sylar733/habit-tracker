@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   webpack(config) {
     config.module.rules.push({
-      test: /\.svg$/, // Target SVG files
-      use: ['@svgr/webpack'], // Use @svgr/webpack loader
+      test: /\.svg$/, 
+      use: ['@svgr/webpack'], 
     });
     return config;
   },

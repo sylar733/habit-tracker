@@ -2,11 +2,10 @@
 
 import Appicon from "../SVG_ICONS/logo.svg";
 import Link from "next/link";
-import { useAuth, SignInButton, SignedOut, SignedIn, UserButton } from "@clerk/nextjs";
+import {  SignInButton, SignedOut, SignedIn, UserButton } from "@clerk/nextjs";
 
 function Navbar() {
   const BackgroundColorObject = { backgroundColor: "#DC2626" };
-  const { userId } = useAuth();
 
   return (
     <header>
