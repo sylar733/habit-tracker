@@ -1,15 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import '@fontsource/open-sans';
+import '@fontsource/roboto-mono';
 import "./globals.css";
+import { Open_Sans, Roboto_Mono } from "next/font/google";
+import {
+  ClerkProvider
+} from "@clerk/nextjs";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -23,12 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+<ClerkProvider>
+  <html lang="en">
+    <body
+      className={`${openSans.variable} ${robotoMono.variable} antialiased`}
+    >
+      {children}
+    </body>
+  </html>
+</ClerkProvider>
   );
 }
