@@ -1,19 +1,19 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import User from '../../models/UserShecma'; 
-import connectDB from '../../lib/conncetToDB'; 
+import { NextRequest } from 'next/server';
+import User from '../../models/UserSchema';
+import connectDB from '../../lib/conncetToDB';
 
-export async function POST(req: Request) {
-  const SIGNING_SECRET = process.env.SIGNING_SECRET;
+export async function POST(req: NextRequest) {
+  const SIGNING_SECRET = process.env.WEBHOOK_SECRET;
 
   if (!SIGNING_SECRET) {
-    console.error('Error: SIGNING_SECRET is missing');
-    return new Response('Error: SIGNING_SECRET is missing', { status: 500 });
+    console.error('Error: WEBHOOK_SECRET is missing');
+    return new Response('Error: WEBHOOK_SECRET is missing', { status: 500 });
   }
 
   const webhook = new Webhook(SIGNING_SECRET);
-
   const headerPayload = await headers();
   const svix_id = headerPayload.get('svix-id');
   const svix_timestamp = headerPayload.get('svix-timestamp');
@@ -39,11 +39,14 @@ export async function POST(req: Request) {
     return new Response('Error: Webhook verification failed', { status: 400 });
   }
 
+  console.log('Webhook verified successfully.');
+  console.log('Received payload:', JSON.stringify(event, null, 2));
+
   const { id } = event.data;
   const eventType = event.type;
 
-  console.log(`Received webhook: ID=${id}, Type=${eventType}`);
-  console.log('Payload data:', event.data);
+  console.log(`Event type: ${eventType}`);
+  console.log(`Event data: ID=${id}`);
 
   if (eventType === 'user.created') {
     const emailAddress = event.data.email_addresses?.[0]?.email_address;
@@ -54,16 +57,12 @@ export async function POST(req: Request) {
     }
 
     try {
-      console.log('Connecting to the database...');
+      console.log('Connecting to database...');
       await connectDB();
       console.log('Database connected.');
 
-      const user = new User({
-        clerkId: id,
-        emailAddress,
-        createdAt: new Date(),
-      });
-
+      console.log('Creating user with:', { clerkId: id, emailAddress });
+      const user = new User({ clerkId: id, emailAddress });
       await user.save();
       console.log('User saved successfully:', user);
 
@@ -71,9 +70,9 @@ export async function POST(req: Request) {
     } catch (err) {
       console.error('Error saving user to the database:', err);
       return new Response('Error saving user to the database', { status: 500 });
-        }
+    }
   }
 
-  console.error('Unsupported event type:', eventType);
+  console.error('Error: Unsupported event type');
   return new Response('Error: Unsupported event type', { status: 400 });
 }
